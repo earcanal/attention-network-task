@@ -230,7 +230,7 @@ Set up jsPsych blocks
 		}
 	}
 
-Set up post task questionnaire
+Set up post task questionnaire.
 
 	var post_task_block = {
 	   type: 'survey-text',
@@ -615,7 +615,13 @@ Last fixation has variable duration.
 		attention_network_task_experiment.push(attention_node)
 		attention_network_task_experiment.push(rest_block)
 	}
+
+Optional post-task questionnaire.
+
 	if (PostTask == 1)
 		attention_network_task_experiment.push(post_task_block)
+
+Optional "thank you" block.
+
 	if (Lab == 1)
 		attention_network_task_experiment.push(end_block)
