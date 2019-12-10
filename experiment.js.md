@@ -208,7 +208,7 @@ trials above fixation (18-20), 6 double cue trials below fixation (36-41), and
 	var practice_block = jsPsych.randomization.repeat(test_stimuli.slice(0, 12).concat(test_stimuli.slice(
 		18, 21)).concat(test_stimuli.slice(36, 45)), 1, true);
 
-There are three test blocks.
+Three test blocks * 48 trials per block = 144 trials.
 
 	var block1_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 	var block2_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
