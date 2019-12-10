@@ -95,6 +95,9 @@
 	var current_trial = 0
 	var exp_stage = 'practice'
 	var test_stimuli = []
+
+Valid responses are <- and ->
+
 	var choices = [37, 39]
 	var path = 'images/'
 	var images = [path + 'right_arrow.png', path + 'left_arrow.png', path + 'no_arrow.png']
