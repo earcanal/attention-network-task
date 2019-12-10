@@ -78,9 +78,7 @@ var attention_check_thresh = 0.65
 var sumInstructTime = 0 //ms
 var instructTimeThresh = 0 ///in seconds
 var credit_var = true
-
 // task specific variables
-/* set up stim: location (2) * cue (4) * direction (2) * condition (3) */
 var locations = ['up', 'down']
 var cues = ['nocue', 'center', 'double', 'spatial']
 var current_trial = 0

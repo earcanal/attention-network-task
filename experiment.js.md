@@ -92,8 +92,11 @@ To make the each trial last 3500ms, set the final fixation to 3500 - RT (trial -
 	var instructTimeThresh = 0 ///in seconds
 	var credit_var = true
 
+There are 48 trial types: arrow location (2, above or below fixation) * cue
+(4, none, double, spatial * 2) * central arrow direction (2, left or right) *
+flanker condition (3, congruent, incongruent, neutral).
+
 	// task specific variables
-	/* set up stim: location (2) * cue (4) * direction (2) * condition (3) */
 	var locations = ['up', 'down']
 	var cues = ['nocue', 'center', 'double', 'spatial']
 	var current_trial = 0
