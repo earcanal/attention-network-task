@@ -193,7 +193,10 @@ Central arrow pointing right, with neutral flankers, arrows pointing right, or a
 		}
 	}
 
-A practice block consists of 24 trials; Include all nocue up trials, center cue up trials, double cue down trials, and 6 spatial trials (3 up, 3 down)
+A practice block consists of 24 randomised trials, including 6 nocue trials
+above fixation (0-5), 6 center cue trials above fixation (6-11), 3 spatial
+trials above fixation (18-20), 6 double cue trials below fixation (36-41), and
+3 spatial trials below fixation (42-44).
 
 	var practice_block = jsPsych.randomization.repeat(test_stimuli.slice(0, 12).concat(test_stimuli.slice(
 		18, 21)).concat(test_stimuli.slice(36, 45)), 1, true);
