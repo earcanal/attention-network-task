@@ -65,13 +65,9 @@ var getInstructFeedback = function() {
 }
 var post_trial_gap = function() {
     var curr_trial = jsPsych.progress().current_trial_global
-    return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
-}
-
-var getInstructFeedback = function() {
-    return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
-        '</p></div>'
-}
+  return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
+  return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
+      '</p></div>'
 // generic task variables
 var run_attention_checks = false
 var attention_check_thresh = 0.65
@@ -364,6 +360,7 @@ if (Practise == 1) {
     var block = practice_block
     for (i = 0; i < block.data.length; i++) {
         var trial_num = trial_num + 1
+        // FIXME: factor out settings common to practice and experimental trials
         var first_fixation_gap = Math.floor(Math.random() * 1200) + 400;
         var first_fixation = {
             type: 'poldrack-single-stim',

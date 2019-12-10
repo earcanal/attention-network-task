@@ -73,7 +73,8 @@ Calculate duration of final fixation.
 	var post_trial_gap = function() {
 		var curr_trial = jsPsych.progress().current_trial_global
 
-This is where the magic happens!
+To make the each trial last 3500ms, set the final fixation to 3500 - RT (trial
+- 1) - first fixation duration (trial - 4).
 
 		return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
 	}
@@ -82,7 +83,6 @@ This is where the magic happens!
 		return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
 			'</p></div>'
 	}
-
 
 ## Experimental variables
 
@@ -430,6 +430,10 @@ Optional practice block.
 		var block = practice_block
 		for (i = 0; i < block.data.length; i++) {
 			var trial_num = trial_num + 1
+
+First fixation varies between 400-1200ms.
+
+			// FIXME: factor out settings common to practice and experimental trials
 			var first_fixation_gap = Math.floor(Math.random() * 1200) + 400;
 			var first_fixation = {
 				type: 'poldrack-single-stim',
@@ -528,6 +532,9 @@ Experimental blocks.
 		var block = blocks[b]
 		for (i = 0; i < block.data.length; i++) {
 			var trial_num = trial_num + 1
+
+First fixation varies between 400-1200ms.
+
 			var first_fixation_gap = Math.floor(Math.random() * 1200) + 400;
 			var first_fixation = {
 				type: 'poldrack-single-stim',
