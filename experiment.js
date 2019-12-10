@@ -65,9 +65,13 @@ var getInstructFeedback = function() {
 }
 var post_trial_gap = function() {
     var curr_trial = jsPsych.progress().current_trial_global
-  return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
-  return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
-      '</p></div>'
+    return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
+}
+
+var getInstructFeedback = function() {
+    return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
+        '</p></div>'
+}
 // generic task variables
 var run_attention_checks = false
 var attention_check_thresh = 0.65

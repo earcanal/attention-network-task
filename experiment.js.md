@@ -73,8 +73,7 @@ Calculate duration of final fixation.
 	var post_trial_gap = function() {
 		var curr_trial = jsPsych.progress().current_trial_global
 
-To make the each trial last 3500ms, set the final fixation to 3500 - RT (trial
-- 1) - first fixation duration (trial - 4).
+To make the each trial last 3500ms, set the final fixation to 3500 - RT (trial - 1) - first fixation duration (trial - 4).
 
 		return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
 	}
