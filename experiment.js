@@ -92,7 +92,6 @@ var path = 'images/'
 var images = [path + 'right_arrow.png', path + 'left_arrow.png', path + 'no_arrow.png']
 //preload
 jsPsych.pluginAPI.preloadImages(images)
-
 for (l = 0; l < locations.length; l++) {
     var loc = locations[l]
     for (ci = 0; ci < cues.length; ci++) {
@@ -130,7 +129,8 @@ for (l = 0; l < locations.length; l++) {
                 cue: c, 
                 trial_id: 'stim'
             }
-        }, {
+        },
+        {
             stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
                 '><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img></div></div>',
             data: {
@@ -171,8 +171,6 @@ for (l = 0; l < locations.length; l++) {
 }
 var practice_block = jsPsych.randomization.repeat(test_stimuli.slice(0, 12).concat(test_stimuli.slice(
     18, 21)).concat(test_stimuli.slice(36, 45)), 1, true);
-
-/* set up repeats for three test blocks */
 var block1_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 var block2_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 var block3_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);

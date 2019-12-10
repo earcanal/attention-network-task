@@ -104,11 +104,19 @@ Valid responses are <- and ->
 	//preload
 	jsPsych.pluginAPI.preloadImages(images)
 
+For each location where the arrows can appear (above or below fixation)
+
 	for (l = 0; l < locations.length; l++) {
 		var loc = locations[l]
+
+For each asterisk cue (none, centre, double, spatial)
+
 		for (ci = 0; ci < cues.length; ci++) {
 			var c = cues[ci]
 			stims = [{
+
+Central arrow pointing left, with arrows pointing left, or arrows pointing right
+
 				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
 					'><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img></div></div>',
 				data: {
@@ -141,7 +149,11 @@ Valid responses are <- and ->
 					cue: c, 
 					trial_id: 'stim'
 				}
-			}, {
+			},
+
+Central arrow pointing right, with neutral flankers, arrows pointing right, or arrows pointing left
+
+			{
 				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
 					'><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img></div></div>',
 				data: {
@@ -181,17 +193,17 @@ Valid responses are <- and ->
 		}
 	}
 
-Set up 24 practice trials. Include all nocue up trials, center cue up trials, double cue down trials, and 6 spatial trials (3 up, 3 down)
+A practice block consists of 24 trials; Include all nocue up trials, center cue up trials, double cue down trials, and 6 spatial trials (3 up, 3 down)
 
 	var practice_block = jsPsych.randomization.repeat(test_stimuli.slice(0, 12).concat(test_stimuli.slice(
 		18, 21)).concat(test_stimuli.slice(36, 45)), 1, true);
 
-	/* set up repeats for three test blocks */
+There are three test blocks.
+
 	var block1_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 	var block2_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 	var block3_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
 	var blocks = [block1_trials, block2_trials, block3_trials]
-
 
 Set up jsPsych blocks
 
