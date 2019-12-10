@@ -63,7 +63,6 @@ var getInstructFeedback = function() {
     return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
         '</p></div>'
 }
-
 var post_trial_gap = function() {
     var curr_trial = jsPsych.progress().current_trial_global
     return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
@@ -287,7 +286,6 @@ var rest_block = {
     },
     timing_post_trial: 1000
 };
-
 var fixation = {
     type: 'poldrack-single-stim',
     stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
@@ -305,7 +303,6 @@ var fixation = {
         })
     }
 }
-
 var no_cue = {
     type: 'poldrack-single-stim',
     stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
@@ -525,14 +522,12 @@ for (b = 0; b < blocks.length; b++) {
             }
         }
         attention_network_task_experiment.push(ANT_trial)
-
         var last_fixation = {
             type: 'poldrack-single-stim',
             stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
             is_html: true,
             choices: 'none',
             data: {
-
                 trial_id: "fixation",
                 exp_stage: 'test'
             },

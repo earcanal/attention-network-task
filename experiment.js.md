@@ -68,8 +68,13 @@
 			'</p></div>'
 	}
 
+Calculate duration of final fixation.
+
 	var post_trial_gap = function() {
 		var curr_trial = jsPsych.progress().current_trial_global
+
+This is where the magic happens!
+
 		return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
 	}
 
@@ -281,7 +286,8 @@ define static blocks
 		timing_response: 180000
 	};
 
-This ensures that the subject does not read through the instructions too quickly.  If they do it too quickly, then we will go over the loop again.
+Ensures that the subject does not read through the instructions too quickly. 
+If they do, then we will go over the loop again.
 
 	if (Practise == 1) {
 		practice_instructions = '<p class = block-text>After you end instructions we will start with practice. During practice you will receive feedback about whether your responses are correct. You will not receive feedback during the rest of the experiment.</p><p class=block-text>Click <strong>End Instructions</strong>, then move the mouse pointer off of the screen before starting with practice.</p>'
@@ -305,7 +311,7 @@ This ensures that the subject does not read through the instructions too quickly
 	var instruction_node = {
 		timeline: [feedback_instruct_block, instructions_block],
 
-This function defines stopping criteria
+Stopping criteria
 
 		loop_function: function(data) {
 			for (i = 0; i < data.length; i++) {
@@ -335,6 +341,8 @@ This function defines stopping criteria
 		timing_post_trial: 1000
 	};
 
+Fixations last 400ms.
+
 	var fixation = {
 		type: 'poldrack-single-stim',
 		stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
@@ -352,6 +360,8 @@ This function defines stopping criteria
 			})
 		}
 	}
+
+Cues last 100ms.
 
 	var no_cue = {
 		type: 'poldrack-single-stim',
@@ -408,12 +418,12 @@ This function defines stopping criteria
 		}
 	}
 
-## set up ANT experiment
+## Configure experiment
 
 	var attention_network_task_experiment = [];
 	attention_network_task_experiment.push(instruction_node);
 
-set up ANT practice
+Optional practice block.
 
 	if (Practise == 1) {
 		var trial_num = 0
@@ -511,8 +521,7 @@ set up ANT practice
 	}
 	attention_network_task_experiment.push(test_intro_block);
 
-
-Set up ANT main task
+Experimental blocks.
 
 	var trial_num = 0
 	for (b = 0; b < blocks.length; b++) {
@@ -569,6 +578,9 @@ Set up ANT main task
 				is_html: true,
 				choices: choices,
 				data: block.data[i],
+
+Participants have 1700ms to respond.
+
 				timing_response: 1700,
 				timing_stim: 1700,
 				response_ends_trial: true,
@@ -583,13 +595,14 @@ Set up ANT main task
 			}
 			attention_network_task_experiment.push(ANT_trial)
 
+Last fixation has variable duration.
+
 			var last_fixation = {
 				type: 'poldrack-single-stim',
 				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
 				is_html: true,
 				choices: 'none',
 				data: {
-
 					trial_id: "fixation",
 					exp_stage: 'test'
 				},
