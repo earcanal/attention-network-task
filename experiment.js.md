@@ -1,0 +1,636 @@
+# Attention Network Test
+
+## Helper functions
+
+	function evalAttentionChecks() {
+		var check_percent = 1
+		if (run_attention_checks) {
+			var attention_check_trials = jsPsych.data.getTrialsOfType('attention-check')
+			var checks_passed = 0
+			for (var i = 0; i < attention_check_trials.length; i++) {
+				if (attention_check_trials[i].correct === true) {
+					checks_passed += 1
+				}
+			}
+			check_percent = checks_passed / attention_check_trials.length
+		}
+		return check_percent
+	}
+
+	function assessPerformance() {
+		/* Function to calculate the "credit_var", which is a boolean used to
+		credit individual experiments in expfactory. 
+		 */
+		var experiment_data = jsPsych.data.getTrialsOfType('poldrack-single-stim')
+		var missed_count = 0
+		var trial_count = 0
+		var rt_array = []
+		var rt = 0
+			//record choices participants made
+		var choice_counts = {}
+		choice_counts[-1] = 0
+		for (var k = 0; k < choices.length; k++) {
+			choice_counts[choices[k]] = 0
+		}
+		for (var i = 0; i < experiment_data.length; i++) {
+			if (experiment_data[i].possible_responses != 'none') {
+				trial_count += 1
+				rt = experiment_data[i].rt
+				key = experiment_data[i].key_press
+				choice_counts[key] += 1
+				if (rt == -1) {
+					missed_count += 1
+				} else {
+					rt_array.push(rt)
+				}
+			}
+		}
+		//calculate average rt
+		var avg_rt = -1
+		if (rt_array.length !== 0) {
+			avg_rt = math.median(rt_array)
+		} 
+			//calculate whether response distribution is okay
+		var responses_ok = true
+		Object.keys(choice_counts).forEach(function(key, index) {
+			if (choice_counts[key] > trial_count * 0.85) {
+				responses_ok = false
+			}
+		})
+		var missed_percent = missed_count/trial_count
+		credit_var = (missed_percent < 0.4 && avg_rt > 200 && responses_ok)
+		jsPsych.data.addDataToLastTrial({"credit_var": credit_var})
+
+	}
+
+	var getInstructFeedback = function() {
+		return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
+			'</p></div>'
+	}
+
+Calculate duration of final fixation.
+
+	var post_trial_gap = function() {
+		var curr_trial = jsPsych.progress().current_trial_global
+
+To make the each trial last 3500ms, set the final fixation to 3500 - RT (trial - 1) - first fixation duration (trial - 4).
+
+		return 3500 - jsPsych.data.getData()[curr_trial - 1].block_duration - jsPsych.data.getData()[curr_trial - 4].block_duration
+	}
+
+	var getInstructFeedback = function() {
+		return '<div class = centerbox><p class = center-block-text>' + feedback_instruct_text +
+			'</p></div>'
+	}
+
+## Experimental variables
+
+	// generic task variables
+	var run_attention_checks = false
+	var attention_check_thresh = 0.65
+	var sumInstructTime = 0 //ms
+	var instructTimeThresh = 0 ///in seconds
+	var credit_var = true
+
+There are 48 trial types: arrow location (2, above or below fixation) * cue
+(4, none, double, spatial * 2) * central arrow direction (2, left or right) *
+flanker condition (3, congruent, incongruent, neutral).
+
+	// task specific variables
+	var locations = ['up', 'down']
+	var cues = ['nocue', 'center', 'double', 'spatial']
+	var current_trial = 0
+	var exp_stage = 'practice'
+	var test_stimuli = []
+
+Valid responses are <- and ->
+
+	var choices = [37, 39]
+	var path = 'images/'
+	var images = [path + 'right_arrow.png', path + 'left_arrow.png', path + 'no_arrow.png']
+	//preload
+	jsPsych.pluginAPI.preloadImages(images)
+
+For each location where the arrows can appear (above or below fixation)
+
+	for (l = 0; l < locations.length; l++) {
+		var loc = locations[l]
+
+For each asterisk cue (none, centre, double, spatial)
+
+		for (ci = 0; ci < cues.length; ci++) {
+			var c = cues[ci]
+			stims = [{
+
+Central arrow pointing left, with arrows pointing left, or arrows pointing right
+
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img></div></div>',
+				data: {
+					correct_response: 37,
+					flanker_middle_direction: 'left',
+					flanker_type: 'neutral',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			}, {
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img></div></div>',
+				data: {
+					correct_response: 37,
+					flanker_middle_direction: 'left',
+					flanker_type: 'congruent',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			}, {
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img></div></div>',
+				data: {
+					correct_response: 37,
+					flanker_middle_direction: 'left',
+					flanker_type: 'incongruent',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			},
+
+Central arrow pointing right, with neutral flankers, arrows pointing right, or arrows pointing left
+
+			{
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[2] + '></img><img class = ANT_img src = ' + images[2] + '></img></div></div>',
+				data: {
+					correct_response: 39,
+					flanker_middle_direction: 'right',
+					flanker_type: 'neutral',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			}, {
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[0] + '></img></div></div>',
+				data: {
+					correct_response: 39,
+					flanker_middle_direction: 'right',
+					flanker_type: 'congruent',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			}, {
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_' + loc +
+					'><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[0] + '></img><img class = ANT_img src = ' + images[1] + '></img><img class = ANT_img src = ' + images[1] + '></img></div></div>',
+				data: {
+					correct_response: 39,
+					flanker_middle_direction: 'right',
+					flanker_type: 'incongruent',
+					flanker_location: loc,
+					cue: c, 
+					trial_id: 'stim'
+				}
+			}]
+			for (i = 0; i < stims.length; i++) {
+				test_stimuli.push(stims[i])
+			}
+		}
+	}
+
+A practice block consists of 24 randomised trials, including 6 nocue trials
+above fixation (0-5), 6 center cue trials above fixation (6-11), 3 spatial
+trials above fixation (18-20), 6 double cue trials below fixation (36-41), and
+3 spatial trials below fixation (42-44).
+
+	var practice_block = jsPsych.randomization.repeat(test_stimuli.slice(0, 12).concat(test_stimuli.slice(
+		18, 21)).concat(test_stimuli.slice(36, 45)), 1, true);
+
+Three test blocks * 48 trials per block = 144 trials.
+
+	var block1_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
+	var block2_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
+	var block3_trials = jsPsych.randomization.repeat($.extend(true, [], test_stimuli), 1, true);
+	var blocks = [block1_trials, block2_trials, block3_trials]
+
+Set up jsPsych blocks
+
+	// Set up attention check node
+	var attention_check_block = {
+		type: 'attention-check',
+		timing_response: 180000,
+		response_ends_trial: true,
+		timing_post_trial: 200
+	}
+
+	var attention_node = {
+		timeline: [attention_check_block],
+		conditional_function: function() {
+			return run_attention_checks
+		}
+	}
+
+Set up post task questionnaire.
+
+	var post_task_block = {
+	   type: 'survey-text',
+	   data: {
+	       trial_id: "post task questions"
+	   },
+	   questions: ['<p class = center-block-text style = "font-size: 20px">Please summarize what you were asked to do in this task.</p>',
+	              '<p class = center-block-text style = "font-size: 20px">Do you have any comments about this task?</p>'],
+	   rows: [15, 15],
+	   columns: [60,60]
+	};
+
+define static blocks
+
+	var test_intro_block = {
+		type: 'poldrack-text',
+		text: '<div class = centerbox><p class = center-block-text>We will now start the test. Move the mouse pointer off of the screen, then press <strong>enter</strong> to begin.</p></div>',
+		cont_key: [13],
+		data: {
+			trial_id: "intro",
+			exp_stage: "test"
+		},
+		timing_response: 180000,
+		timing_post_trial: 1000,
+		on_finish: function() {
+			exp_stage = 'test'
+		}
+	};
+
+	var end_block = {
+		type: 'poldrack-text',
+		text: '<div class = centerbox><p class = center-block-text>Thanks for completing this task!</p><p class = center-block-text>Please contact the researcher.</p></div>',
+		cont_key: ['c'],
+		data: {
+			trial_id: "end",
+	    	exp_id: 'attention_network_task_2'
+		},
+		timing_response: 180000,
+		timing_post_trial: 0,
+		on_finish: assessPerformance
+	};
+
+	var feedback_instruct_text =
+		'Welcome to the experiment. This experiment will take about 15 minutes. Press <strong>enter</strong> to begin.'
+	var feedback_instruct_block = {
+		type: 'poldrack-text',
+		cont_key: [13],
+		text: getInstructFeedback,
+		data: {
+			trial_id: 'instruction'
+		},
+		timing_post_trial: 0,
+		timing_response: 180000
+	};
+
+Ensures that the subject does not read through the instructions too quickly. 
+If they do, then we will go over the loop again.
+
+	if (Practise == 1) {
+		practice_instructions = '<p class = block-text>After you end instructions we will start with practice. During practice you will receive feedback about whether your responses are correct. You will not receive feedback during the rest of the experiment.</p><p class=block-text>Click <strong>End Instructions</strong>, then move the mouse pointer off of the screen before starting with practice.</p>'
+	} else {
+		practice_instructions = '<p class = block-text>There will be no practice trials.  You will not receive feedback on your accuracy during the experiment.</p>'
+	}
+	var instructions_block = {
+		type: 'poldrack-instructions',
+		pages: [
+			'<div class = centerbox><p class = block-text>In this experiment you will see groups of five arrows and dashes pointing left or right (e.g &larr; &larr; &larr; &larr; &larr;, or &mdash; &mdash; &rarr; &mdash; &mdash;) presented randomly at the top or bottom of the screen.</p><p class = block-text>Your job is to indicate which way the <strong>central arrow</strong> is pointing by pressing the corresponding arrow key.</p></p></p></div>',
+			'<div class = centerbox><p class = block-text>Start each trial by attending to the cross in the center of the screen.  Before the arrows appear, a * may appear somewhere on the screen.</p><p class = block-text>Irrespective of whether or where the * appears, it is important that you <strong>respond as quickly and accurately as possible</strong> by pressing the arrow key corresponding to the direction of the <strong>center arrow</strong>.</p>' + practice_instructions + '</div>'
+		],
+		allow_keys: false,
+		data: {
+			trial_id: 'instruction'
+		},
+		show_clickable_nav: true,
+		timing_post_trial: 1000
+	};
+
+	var instruction_node = {
+		timeline: [feedback_instruct_block, instructions_block],
+
+Stopping criteria
+
+		loop_function: function(data) {
+			for (i = 0; i < data.length; i++) {
+				if ((data[i].trial_type == 'poldrack-instructions') && (data[i].rt != -1)) {
+					rt = data[i].rt
+					sumInstructTime = sumInstructTime + rt
+				}
+			}
+			if (sumInstructTime <= instructTimeThresh * 1000) {
+				feedback_instruct_text =
+					'Read through instructions too quickly.  Please take your time and make sure you understand the instructions.  Press <strong>enter</strong> to continue.'
+				return true
+			} else if (sumInstructTime > instructTimeThresh * 1000) {
+				feedback_instruct_text = 'Done with instructions. Press <strong>enter</strong> to continue.'
+				return false
+			}
+		}
+	}
+
+	var rest_block = {
+		type: 'poldrack-text',
+		text: '<div class = centerbox><p class = block-text>Take a break! Press any key to continue.</p></div>',
+		timing_response: 180000,
+		data: {
+			trial_id: "rest block"
+		},
+		timing_post_trial: 1000
+	};
+
+Fixations last 400ms.
+
+	var fixation = {
+		type: 'poldrack-single-stim',
+		stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+		is_html: true,
+		choices: 'none',
+		data: {
+			trial_id: 'fixation'
+		},
+		timing_post_trial: 0,
+		timing_stim: 400,
+		timing_response: 400,
+		on_finish: function() {
+			jsPsych.data.addDataToLastTrial({
+				exp_stage: exp_stage
+			})
+		}
+	}
+
+Cues last 100ms.
+
+	var no_cue = {
+		type: 'poldrack-single-stim',
+		stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+		is_html: true,
+		choices: 'none',
+		data: {
+			trial_id: 'nocue'
+		},
+		timing_post_trial: 0,
+		timing_stim: 100,
+		timing_response: 100,
+		on_finish: function() {
+			jsPsych.data.addDataToLastTrial({
+				exp_stage: exp_stage
+			})
+		}
+	}
+
+	var center_cue = {
+		type: 'poldrack-single-stim',
+		stimulus: '<div class = centerbox><div class = ANT_centercue_text>*</div></div>',
+		is_html: true,
+		choices: 'none',
+		data: {
+			trial_id: 'centercue'
+		},
+		timing_post_trial: 0,
+		timing_stim: 100,
+		timing_response: 100,
+		on_finish: function() {
+			jsPsych.data.addDataToLastTrial({
+				exp_stage: exp_stage
+			})
+		}
+
+	}
+
+	var double_cue = {
+		type: 'poldrack-single-stim',
+		stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = ANT_down><div class = ANT_text>*</div></div><div class = ANT_up><div class = ANT_text>*</div><div></div>',
+		is_html: true,
+		choices: 'none',
+		data: {
+			trial_id: 'doublecue'
+		},
+		timing_post_trial: 0,
+		timing_stim: 100,
+		timing_response: 100,
+		on_finish: function() {
+			jsPsych.data.addDataToLastTrial({
+				exp_stage: exp_stage
+			})
+		}
+	}
+
+## Configure experiment
+
+	var attention_network_task_experiment = [];
+	attention_network_task_experiment.push(instruction_node);
+
+Optional practice block.
+
+	if (Practise == 1) {
+		var trial_num = 0
+		var block = practice_block
+		for (i = 0; i < block.data.length; i++) {
+			var trial_num = trial_num + 1
+
+First fixation varies between 400-1200ms.
+
+			// FIXME: factor out settings common to practice and experimental trials
+			var first_fixation_gap = Math.floor(Math.random() * 1200) + 400;
+			var first_fixation = {
+				type: 'poldrack-single-stim',
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+				is_html: true,
+				choices: 'none',
+				data: {
+
+					trial_id: 'fixation',
+					exp_stage: 'practice'
+				},
+				timing_post_trial: 0,
+				timing_stim: first_fixation_gap,
+				timing_response: first_fixation_gap
+			}
+			attention_network_task_experiment.push(first_fixation)
+
+			if (block.data[i].cue == 'nocue') {
+				attention_network_task_experiment.push(no_cue)
+			} else if (block.data[i].cue == 'center') {
+				attention_network_task_experiment.push(center_cue)
+			} else if (block.data[i].cue == 'double') {
+				attention_network_task_experiment.push(double_cue)
+			} else {
+				var spatial_cue = {
+					type: 'poldrack-single-stim',
+					stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = centerbox><div class = ANT_' + block.data[i].flanker_location +
+						'><div class = ANT_text>*</p></div></div>',
+					is_html: true,
+					choices: 'none',
+					data: {
+
+						trial_id: 'spatialcue',
+						exp_stage: 'practice'
+					},
+					timing_post_trial: 0,
+					timing_stim: 100,
+					timing_response: 100
+				}
+				attention_network_task_experiment.push(spatial_cue)
+			}
+
+			attention_network_task_experiment.push(fixation)
+
+			block.data[i].trial_num = trial_num
+			var attention_network_task_practice_trial = {
+				type: 'poldrack-categorize',
+				stimulus: block.stimulus[i],
+				is_html: true,
+				key_answer: block.data[i].correct_response,
+				correct_text: '<div class = centerbox><div style="color:green"; class = center-text>Correct!</div></div>',
+				incorrect_text: '<div class = centerbox><div style="color:red"; class = center-text>Incorrect</div></div>',
+				timeout_message: '<div class = centerbox><div class = center-text>Respond faster!</div></div>',
+				choices: choices,
+				data: block.data[i],
+				timing_response: 1700,
+				timing_stim: 1700,
+				response_ends_trial: true,
+				timing_feedback_duration: 1000,
+				show_stim_with_feedback: false,
+				timing_post_trial: 0,
+				on_finish: function() {
+					jsPsych.data.addDataToLastTrial({
+						exp_stage: exp_stage
+					})
+				}
+			}
+
+			attention_network_task_experiment.push(attention_network_task_practice_trial)
+
+			var last_fixation = {
+				type: 'poldrack-single-stim',
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+				is_html: true,
+				choices: 'none',
+				data: {
+
+					trial_id: 'fixation',
+					exp_stage: 'practice'
+				},
+				timing_post_trial: 0,
+				timing_stim: post_trial_gap,
+				timing_response: post_trial_gap,
+			}
+			attention_network_task_experiment.push(last_fixation)
+		}
+
+		attention_network_task_experiment.push(rest_block)
+	}
+	attention_network_task_experiment.push(test_intro_block);
+
+Experimental blocks.
+
+	var trial_num = 0
+	for (b = 0; b < blocks.length; b++) {
+		var block = blocks[b]
+		for (i = 0; i < block.data.length; i++) {
+			var trial_num = trial_num + 1
+
+First fixation varies between 400-1200ms.
+
+			var first_fixation_gap = Math.floor(Math.random() * 1200) + 400;
+			var first_fixation = {
+				type: 'poldrack-single-stim',
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+				is_html: true,
+				choices: 'none',
+				data: {
+
+					trial_id: "fixation",
+					exp_stage: 'test'
+				},
+				timing_post_trial: 0,
+				timing_stim: first_fixation_gap,
+				timing_response: first_fixation_gap
+			}
+			attention_network_task_experiment.push(first_fixation)
+
+			if (block.data[i].cue == 'nocue') {
+				attention_network_task_experiment.push(no_cue)
+			} else if (block.data[i].cue == 'center') {
+				attention_network_task_experiment.push(center_cue)
+			} else if (block.data[i].cue == 'double') {
+				attention_network_task_experiment.push(double_cue)
+			} else {
+				var spatial_cue = {
+					type: 'poldrack-single-stim',
+					stimulus: '<div class = centerbox><div class = ANT_text>+</div></div><div class = centerbox><div class = ANT_' + block.data[i].flanker_location +
+						'><div class = ANT_text>*</p></div></div>',
+					is_html: true,
+					choices: 'none',
+					data: {
+
+						trial_id: "spatialcue",
+						exp_stage: 'test'
+					},
+					timing_post_trial: 0,
+					timing_stim: 100,
+					timing_response: 100
+				}
+				attention_network_task_experiment.push(spatial_cue)
+			}
+			attention_network_task_experiment.push(fixation)
+
+			block.data[i].trial_num = trial_num
+			var ANT_trial = {
+				type: 'poldrack-single-stim',
+				stimulus: block.stimulus[i],
+				is_html: true,
+				choices: choices,
+				data: block.data[i],
+
+Participants have 1700ms to respond.
+
+				timing_response: 1700,
+				timing_stim: 1700,
+				response_ends_trial: true,
+				timing_post_trial: 0,
+				on_finish: function(data) {
+					correct = data.key_press === data.correct_response
+					jsPsych.data.addDataToLastTrial({
+						correct: correct,
+						exp_stage: exp_stage
+					})
+				}
+			}
+			attention_network_task_experiment.push(ANT_trial)
+
+Last fixation has variable duration.
+
+			var last_fixation = {
+				type: 'poldrack-single-stim',
+				stimulus: '<div class = centerbox><div class = ANT_text>+</div></div>',
+				is_html: true,
+				choices: 'none',
+				data: {
+					trial_id: "fixation",
+					exp_stage: 'test'
+				},
+				timing_post_trial: 0,
+				timing_stim: post_trial_gap,
+				timing_response: post_trial_gap,
+			}
+			attention_network_task_experiment.push(last_fixation)
+		}
+		attention_network_task_experiment.push(attention_node)
+		attention_network_task_experiment.push(rest_block)
+	}
+
+Optional post-task questionnaire.
+
+	if (PostTask == 1)
+		attention_network_task_experiment.push(post_task_block)
+
+Optional "thank you" block.
+
+	if (Lab == 1)
+		attention_network_task_experiment.push(end_block)
